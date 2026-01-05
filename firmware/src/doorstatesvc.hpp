@@ -12,9 +12,11 @@ class DoorStateService {
 
   public:
     DoorStateService();
+    
 
     void tick();
-    bool getState();
+    bool getSensorState();
+    byte getSwitchState();
     String getStateString();
 };
 

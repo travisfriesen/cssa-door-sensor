@@ -11,6 +11,10 @@
 
 #define TICK_DELAY 10
 
+#define AUTO 0
+#define CLOSED 1
+#define OPEN 2
+
 LEDService LEDSvc;
 WifiService WifiSvc;
 ConfigManager ConfigSvc;
@@ -27,7 +31,7 @@ void setup() {
     Serial.println("Initializing!");
 
     LEDSvc.setBrightness(0.3);
-    LEDSvc.set(COLOR_RED);
+    LEDSvc.set(COLOR_BLUE);
 
     startBackgroundThread();
 
@@ -46,11 +50,16 @@ void loop() {
     Serial.printf("Loop - %.2fs\n", (millis() / 1000.0));
 
     bool doorState = getDoorState();
+    byte switchState = DoorStateSvc.getSwitchState();
 
-    if (doorState) {
+    if (doorState && switchState == AUTO) {
         LEDSvc.set(COLOR_GREEN);
-    } else {
-        LEDSvc.set(COLOR_BLUE);
+    } else if (!doorState && switchState == AUTO) {
+        LEDSvc.set(COLOR_RED);
+    } else if (doorState && switchState == OPEN) {
+        LEDSvc.set(COLOR_YELLOW_GREEN);
+    } else if (!doorState && switchState == CLOSED) {
+        LEDSvc.set(COLOR_DARK_ORANGE);
     }
 
     WebhookSvc.trySendMessage(doorState);
@@ -59,7 +68,7 @@ void loop() {
 }
 
 bool getDoorState() {
-    bool doorState = DoorStateSvc.getState();
+    bool doorState = DoorStateSvc.getSensorState();
     String doorStateString = DoorStateSvc.getStateString();
     Serial.println(doorStateString);
 

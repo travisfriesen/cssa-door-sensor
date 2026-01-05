@@ -12,6 +12,8 @@
 #define COLOR_MAGENTA 255, 0, 255
 #define COLOR_WHITE 255, 255, 255
 #define COLOR_OFF 0, 0, 0
+#define COLOR_DARK_ORANGE 255, 42, 0
+#define COLOR_YELLOW_GREEN 0, 255, 100
 
 class LEDService {
   private:

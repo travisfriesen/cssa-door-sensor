@@ -21,10 +21,12 @@ The device has an LED to monitor device status without connecting to the serial 
 
 | Color | Reason |
 | -- | -- |
-| Solid Red | Device has started booting |
+| Solid Blue | Device has started booting |
 | Solid Orange | Device is in the serial setup menu |
-| Solid Green | Door is OPEN (manual or auto) |
-| Solid Blue | Door is CLOSED (manual or auto) |
+| Solid Yellow-Green| Door is OPEN (manual) |
+| Solid Orange | Door is CLOSED (manual) |
+| Solid Green | Door is OPEN (auto)
+| Solid Red | Door is CLOSED (auto)
 | Blinking Yellow | Device is writing config to flash storage |
 | Blinking Cyan | Device is attempting to connect to WiFi |
 | Blinking Purple | Device is performing an internet connection test |
@@ -42,7 +44,7 @@ The firmware for the ESP32 chip is written in C++ managed by the PlatformIO VSCo
 
 This project uses a NodeMCU-32S clone sold by KeeYees [(Amazon link)](https://www.amazon.ca/dp/B07QCP2451) with the following additional hardware:
 
-- 1x HC-SR04 Ultra Sonic Distance Sensor
+- 1x QWORK MC-38 NC Magnetic Reed Sensor
 - 1x 5mm RGB Common Cathode LED
 - 1x SPDT On-Off-On toggle switch
 

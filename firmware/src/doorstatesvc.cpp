@@ -1,7 +1,6 @@
 #include "doorstatesvc.hpp"
 
 #include <Arduino.h>
-#include <EasyUltrasonic.h>
 
 #include "constants/pins.hpp"
 
@@ -16,7 +15,6 @@
 #define SENSOR_DEBOUNCE_MIN 180
 #define SENSOR_MAX_DISTANCE 70
 
-EasyUltrasonic ultrasonic;
 
 byte switchData[SWITCH_DEBOUNCE_POINTS];
 byte switchDataIndex = 0;
@@ -31,18 +29,21 @@ DoorStateService::DoorStateService() {
     pinMode(Pins::SPDT_A, INPUT);
     pinMode(Pins::SPDT_B, INPUT);
     pinMode(Pins::SPDT_POLE, OUTPUT);
+    pinMode(Pins::REED_SWITCH, INPUT_PULLUP);  // Enable internal pull-up for NC reed switch
 
     digitalWrite(Pins::SPDT_POLE, HIGH);
-
-    ultrasonic.attach(Pins::TRIG, Pins::ECHO);
 }
 
-bool DoorStateService::getState() {
+bool DoorStateService::getSensorState() {
     if (switchState == AUTO) {
         return sensorState;
     } else {
         return switchState == OPEN;
     }
+}
+
+byte DoorStateService::getSwitchState() {
+    return switchState;
 }
 
 void DoorStateService::tick() {
@@ -78,24 +79,26 @@ void DoorStateService::tickSwitch() {
 }
 
 void DoorStateService::tickSensor() {
-    bool state = querySensorState();
+    byte state = digitalRead(Pins::REED_SWITCH);
     sensorData[sensorDataIndex] = state;
     sensorDataIndex = (sensorDataIndex + 1) % SENSOR_DEBOUNCE_POINTS;
 
     byte closedCount = 0;
     byte openCount = 0;
     for (byte i = 0; i < SENSOR_DEBOUNCE_POINTS; i++) {
-        if (sensorData[i]) {
-            openCount++;
-        } else {
+        if (sensorData[i] == HIGH) {
+            // NC switch: HIGH = magnet present = door closed
             closedCount++;
+        } else {
+            // NC switch: LOW = magnet absent = door open
+            openCount++;
         }
     }
 
-    if (openCount >= SENSOR_DEBOUNCE_MIN) {
-        sensorState = true;
-    } else if (closedCount >= SENSOR_DEBOUNCE_MIN) {
-        sensorState = false;
+    if (closedCount >= SENSOR_DEBOUNCE_MIN) {
+        sensorState = true;   // Door is closed
+    } else if (openCount >= SENSOR_DEBOUNCE_MIN) {
+        sensorState = false;  // Door is open
     }
 }
 
@@ -129,6 +132,5 @@ byte DoorStateService::querySwitchMode() {
 }
 
 bool DoorStateService::querySensorState() {
-    float distCm = ultrasonic.getDistanceCM();
-    return distCm < SENSOR_MAX_DISTANCE;
+    return digitalRead(Pins::REED_SWITCH);
 }
